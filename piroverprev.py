@@ -1,5 +1,5 @@
 
-import socket, sys, time, initio, thread, threading, linesensor, servo
+import socket, sys, time, initio, thread, threading, linesensor
 
 # Shuts down the Raspberry Pi
 def shutdown():
@@ -51,10 +51,6 @@ def doCondition() :
 		initio.turnReverse(100,5)
 		time.sleep(float(conditionValue))
 		initio.stop()
-	elif conditionCommand == 'followline' :
-		global shouldFollow
-		linesensor.shouldFollow = True
-		linesensor.followLine()
 	global shouldCheck
 	shouldCheck = False
 
@@ -86,39 +82,23 @@ def getMessage() :
 			print 'shouldCheck is ' + str(shouldCheck)
 		elif (message == 'quit') :
 			lock.acquire()
-			clisock.close()
+			clisock.close
 			print 'Closing socket and creating new one...'
 			createSocket()
 			lock.release()
 		elif (message == 'shutdown') :
-			clisock.close()
 			shutdown()
 		elif (message == 'ultra') :
 			clisock.send(str(initio.getDistance()) + '\n' )
 			print 'Value sent!'
 		elif (message == 'followline') :
-			global conditionCommand
-			conditionCommand = 'followline'
-			doCondition()
+			linesensor.followLine()
 		elif (message == 'stop') :
 			lock.acquire()
-			global shouldFollow
-			linesensor.shouldFollow = False
 			initio.stop()
 			commands[:] = ['none']
 			values [:] = ['none']
 			lock.release()
-		elif (message == 'servoinit') :
-			servo.panInit()
-			servo.tiltInit()
-		elif (message == 'panleft') :
-			servo.panLeft()
-		elif (message == 'panright') :
-			servo.panRight()
-		elif (message == 'tiltup') :
-			servo.tiltUp()
-		elif (message == 'tiltdown') :
-			servo.tiltDown()
 		else :
 			lock.acquire()
 			commands.append(getCommand(message))

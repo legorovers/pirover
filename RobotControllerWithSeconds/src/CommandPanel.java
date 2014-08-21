@@ -43,8 +43,8 @@ public class CommandPanel extends JPanel implements ItemListener {
 	}
 	
 	public void handleUserEvent(){
-		/*Checks for valid input and makes message with standardised format eg. forward020, 
-		left120, displays message in window and passes to method in Client*/
+		/*Checks for valid input and makes message with standardised format eg. forward02.5, 
+		left10.2, displays message in window and passes to method in Client*/
 		if (input.getText().isEmpty())
 			number = "00.0";
 		else {
@@ -90,7 +90,9 @@ public class CommandPanel extends JPanel implements ItemListener {
 			RobotUser.display.append(message + "\n");
 			Client.handleNetworkEvent(message);
 		}
-		input.setText("");
+		/*Removes text from fields after 'go' is pressed. Have commented out as sometimes it
+		is not desireable*/
+		//input.setText("");
 	}
 	
 

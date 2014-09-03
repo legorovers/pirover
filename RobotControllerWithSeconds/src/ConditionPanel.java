@@ -7,39 +7,41 @@ import java.text.DecimalFormat;
 public class ConditionPanel extends JPanel implements ItemListener{
 	
 	private JCheckBox checkbox = new JCheckBox();
-	private JLabel ifLabel = new JLabel("If an obstacle is detected, then");
+	private JLabel ifLabel = new JLabel("If an obstacle is detected with the");
+	private JLabel withLabel = new JLabel("within");
 	private JLabel unitLabel = new JLabel("cm, then");
 	private JTextField distanceInput = new JTextField(3);
 	private String commands[] = {"reverse", "turn left", "turn right", "reverse left", "reverse right", "stop"};
-	private JComboBox choices = new JComboBox(commands);
+	private JComboBox commandChoice = new JComboBox(commands);
+	private String sensors[] = { "ultrasonic sensor", "infrared sensor"};
+	private JComboBox sensorChoice = new JComboBox(sensors);
 	private JTextField valueInput = new JTextField(3);
-	private JLabel labelTurn = new JLabel("seconds");
-	private JLabel labelMove = new JLabel("seconds");
 	private JLabel labelUse = new JLabel("seconds");
-	private JLabel timeFor = new JLabel("for");	
+	private JLabel forLabel = new JLabel("for");	
 	
 	//Constructor makes JPanel with checkbox, drop down menu and textfield for user input
 	public ConditionPanel(){
 		
 		add(checkbox);
 		add(ifLabel);
-		//add(distanceInput);
-		//add(unitLabel);
-		add(choices);
-		add(timeFor);
+		add(sensorChoice);
+		sensorChoice.addItemListener(this);
+		add(withLabel);
+		add(distanceInput);
+		add(unitLabel);
+		add(commandChoice);
+		commandChoice.addItemListener(this);
+		add(forLabel);
 		add(valueInput);
 		add(labelUse);
 		
-		choices.addItemListener(this);
-		
-		this.setPreferredSize(new Dimension(510, 60));		
+		this.setPreferredSize(new Dimension(510, 90));		
 		RobotUser.addBorder(this, "Conditions");
 		
 		
 	}
 	
-	/*Gets user's chosen distance to trigger the command from the first textfield (not used in
-	  this version) */
+	//Gets user's chosen distance to trigger the command from the first textfield
 	public static String getTriggerDistance(ConditionPanel panel){
 		if (panel.distanceInput.getText().isEmpty())
 			return "000";
@@ -49,17 +51,17 @@ public class ConditionPanel extends JPanel implements ItemListener{
 	
 	// Gets user's chosen command from drop down box and returns appropriate string
 	public String getCommand(){
-		if (choices.getSelectedItem().equals(commands[0]))
+		if (commandChoice.getSelectedItem().equals(commands[0]))
 			return "reverse";
-		if (choices.getSelectedItem().equals(commands[1]))
+		if (commandChoice.getSelectedItem().equals(commands[1]))
 			return "left";
-		if (choices.getSelectedItem().equals(commands[2]))
+		if (commandChoice.getSelectedItem().equals(commands[2]))
 			return "right";
-		if (choices.getSelectedItem().equals(commands[3]))
+		if (commandChoice.getSelectedItem().equals(commands[3]))
 			return "reverseleft";
-		if (choices.getSelectedItem().equals(commands[4]))
+		if (commandChoice.getSelectedItem().equals(commands[4]))
 			return "reverseright";
-		if (choices.getSelectedItem().equals(commands[5]))
+		if (commandChoice.getSelectedItem().equals(commands[5]))
 			return "stop";
 		else return "";
 	}
@@ -79,7 +81,6 @@ public class ConditionPanel extends JPanel implements ItemListener{
 		if (panel.checkbox.isSelected()){
 			String message = "y" + getTriggerDistance(panel) + 
 					panel.getCommand() + panel.getValue();
-			RobotUser.display.append(message + "\n");
 			Client.handleNetworkEvent(message);
 			try {
 				Thread.sleep(100);
@@ -88,33 +89,40 @@ public class ConditionPanel extends JPanel implements ItemListener{
 			}
 			
 		}
-		else {
+		/*else {
 			Client.handleNetworkEvent("n");
-			RobotUser.display.append("n");
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e1){
 				Thread.currentThread().interrupt();
 			}
-		}
+		}*/
 	}
 	
-	/* If drop down box says forward/back change JLabel to 'units', if box says left/right
-	   change JLabel to 'degrees', if box says 'stop' then make textbox and units invisible */
+	/* If user has selected 'stop' the number of seconds input is no longer visible. If user
+	 * has selected 'infrared sensor' the input for number of cm is no longer visible. */
 	public void itemStateChanged(ItemEvent e){
-		if (choices.getSelectedItem().equals(commands[2]) || choices.getSelectedItem().equals(commands[3]))
-			labelUse.setText(labelTurn.getText());
-		else
-			labelUse.setText(labelMove.getText());
-		if (choices.getSelectedItem().equals(commands[5])){
+		if (commandChoice.getSelectedItem().equals(commands[5])){
+			valueInput.setText("");
 			valueInput.setVisible(false);
 			labelUse.setVisible(false);
-			timeFor.setVisible(false);
+			forLabel.setVisible(false);
 		}
 		else {
 			valueInput.setVisible(true);
 			labelUse.setVisible(true);
-			timeFor.setVisible(true);
+			forLabel.setVisible(true);
+		}
+		if (sensorChoice.getSelectedItem().equals(sensors[1])){
+			withLabel.setVisible(false);
+			distanceInput.setText("");
+			distanceInput.setVisible(false);
+			unitLabel.setVisible(false);		
+		}
+		else {
+			withLabel.setVisible(true);
+			distanceInput.setVisible(true);
+			unitLabel.setVisible(true);			
 		}
 	}
 

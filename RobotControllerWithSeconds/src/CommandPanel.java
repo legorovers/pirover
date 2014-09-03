@@ -8,15 +8,13 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 
-public class CommandPanel extends JPanel implements ItemListener {
+public class CommandPanel extends JPanel {
 	
 	private String commands[] = {"Go forwards", "Reverse", "Turn left", "Turn right", "Forward left", "Forward right", "Reverse left", "Reverse right"};
 	private JComboBox choices = new JComboBox(commands);
 	private JTextField input = new JTextField(3);
-	private JLabel labelTurn = new JLabel("seconds");
-	private JLabel labelMove = new JLabel("seconds");
-	private JLabel labelUse = new JLabel("seconds");
-	private JLabel timeFor = new JLabel(" for ");
+	private JLabel labelSeconds = new JLabel("seconds");
+	private JLabel forLabel = new JLabel(" for ");
 	private int instructionNo;
 	private JLabel commandNo = new JLabel("");
 	private String number;
@@ -26,20 +24,10 @@ public class CommandPanel extends JPanel implements ItemListener {
 		commandNo.setText("Instruction " + instructionNo + ": ");
 		add(commandNo);
 		add(choices);
-		add(timeFor);
+		add(forLabel);
 		add(input);
-		add(labelUse);
+		add(labelSeconds);
 		
-		choices.addItemListener(this);
-	}
-	
-	/* If drop down box says foward/back change label to 'units', if box says left/right 
-	change label to 'degrees'. */
-	public void itemStateChanged(ItemEvent e){
-		if (choices.getSelectedItem().equals("Turn left") || choices.getSelectedItem().equals("Turn right"))
-			labelUse.setText(labelTurn.getText());
-			else
-			labelUse.setText(labelMove.getText());
 	}
 	
 	public void handleUserEvent(){
@@ -52,42 +40,34 @@ public class CommandPanel extends JPanel implements ItemListener {
 		}
 		if (choices.getSelectedItem().equals(commands[0])){
 			String message = "forward" + number;
-			RobotUser.display.append(message + "\n");
 			Client.handleNetworkEvent(message);
 		}
 		if (choices.getSelectedItem().equals(commands[1])){
 			String message = "reverse" + number;
-			RobotUser.display.append(message + "\n");
 			Client.handleNetworkEvent(message);
 		}
 		if (choices.getSelectedItem().equals(commands[2])){
 			String message = "left" + number;
-			RobotUser.display.append(message + "\n");
 			Client.handleNetworkEvent(message);
 		}
 		if (choices.getSelectedItem().equals(commands[3])){
 			String message = "right" + number;
-			RobotUser.display.append(message + "\n");
 			Client.handleNetworkEvent(message);
 		}
 		if (choices.getSelectedItem().equals(commands[4])){
 			String message = "forwardleft" + number;
-			RobotUser.display.append(message + "\n");
 			Client.handleNetworkEvent(message);
 		}
 		if (choices.getSelectedItem().equals(commands[5])){
 			String message = "forwardright" + number;
-			RobotUser.display.append(message + "\n");
 			Client.handleNetworkEvent(message);
 		}
 		if (choices.getSelectedItem().equals(commands[6])){
 			String message = "reverseleft" + number;
-			RobotUser.display.append(message + "\n");
 			Client.handleNetworkEvent(message);
 		}
 		if (choices.getSelectedItem().equals(commands[7])){
 			String message = "reverseright" + number;
-			RobotUser.display.append(message + "\n");
 			Client.handleNetworkEvent(message);
 		}
 		/*Removes text from fields after 'go' is pressed. Have commented out as sometimes it

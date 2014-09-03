@@ -6,22 +6,27 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.basic.BasicArrowButton;
-
-import java.net.*;
-import java.text.DecimalFormat;
+import javax.swing.text.DefaultCaret;
 
 
-public class RobotUser extends JFrame implements ActionListener {
-	
-	public static JTextArea display = new JTextArea(12,45);
-	private JButton ultra = new JButton("Get ultrasonic sensor value");
+
+public class RobotUser extends JFrame implements ActionListener{
+
+	public static JTextArea messageDisplay = new JTextArea(22,45);
+	public static JTextArea ultraDisplay = new JTextArea(10,45);
+	private JScrollPane messageScrollPane = new JScrollPane(messageDisplay);
+	private JScrollPane ultraScrollPane = new JScrollPane(ultraDisplay);
+	private JButton ultra = new JButton("Receive ultrasonic sensor values");
 	private JButton followLine = new JButton("Follow line");
 	private JButton stop = new JButton("Stop");
-	private JButton clear = new JButton("Clear textfield");
-	private JButton servoinit = new JButton(" ");
+	private JButton clearUltra = new JButton("Clear values");
+	private JButton clearMessage = new JButton("Clear messages");
+	private JButton servoInit = new JButton(" ");
 	private JPanel ultraPanel = new JPanel();
 	private JPanel otherPanel = new JPanel();
 	private JPanel pantilt = new JPanel();
+	private JPanel messagePanel = new JPanel();
+	private JPanel mainPanel = new JPanel();
 	private BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 	private BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
 	private BasicArrowButton up = new BasicArrowButton(BasicArrowButton.NORTH);
@@ -29,6 +34,7 @@ public class RobotUser extends JFrame implements ActionListener {
 	private JMenuBar menuBar = new JMenuBar();
 	private JMenu raspberryPi = new JMenu("Raspberry Pi");
 	private JMenuItem shutdown = new JMenuItem("Shut down");
+	private JTabbedPane tabbedPane = new JTabbedPane();
 	public static ChoosePanelNumber instructionPanel = new ChoosePanelNumber();
 	public static ConditionPanel conditionPanel = new ConditionPanel();
 
@@ -40,12 +46,15 @@ public class RobotUser extends JFrame implements ActionListener {
 		menuBar.add(raspberryPi);
 		raspberryPi.add(shutdown);
 		shutdown.addActionListener(this);
+
+		//Sets layout of mainPanel, for first tab of tabbedPane.
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		
-		//Adds instance of ChoosePanelNumber and ConditionPanel
-		add(instructionPanel);
-		add(conditionPanel);
+		//Adds instance of ChoosePanelNumber and ConditionPanel to mainPanel
+		mainPanel.add(instructionPanel);
+		mainPanel.add(conditionPanel);
 		
-		//Makes panel with pan/tilt controls
+		//Makes panel with pan/tilt controls and adds to mainPanel
 		pantilt.setLayout(new GridLayout(3,3));
 		pantilt.add(new JLabel());
 		pantilt.add(up);
@@ -53,8 +62,8 @@ public class RobotUser extends JFrame implements ActionListener {
 		pantilt.add(new JLabel());
 		pantilt.add(left);
 		left.addActionListener(this);
-		pantilt.add(servoinit);
-		servoinit.addActionListener(this);
+		pantilt.add(servoInit);
+		servoInit.addActionListener(this);
 		pantilt.add(right);
 		right.addActionListener(this);
 		pantilt.add(new JLabel());
@@ -62,52 +71,76 @@ public class RobotUser extends JFrame implements ActionListener {
 		down.addActionListener(this);
 		pantilt.setPreferredSize(new Dimension(510,80));
 		addBorder(pantilt, "Pan and tilt controls");
-		add(pantilt);
+		mainPanel.add(pantilt);
 		
-		// Makes panel with buttons to get the robot to perform other functions
+		/* Makes panel with buttons to get the robot to perform other functions and adds to
+		   mainPanel */
 		otherPanel.add(followLine);
 		followLine.addActionListener(this);
 		otherPanel.add(stop);
 		stop.addActionListener(this);
 		otherPanel.setPreferredSize(new Dimension(510,60));
 		addBorder(otherPanel, "Other functions");
-		add(otherPanel);
+		mainPanel.add(otherPanel);
 		
-		
-		/* Makes panel with button to get ultrasonic sensor distance and textarea to show what is
-		being sent to the raspberry pi */
+		/* Makes panel with button to get ultrasonic sensor distance and adds to mainPanel */
 		ultraPanel.add(ultra);	
 		ultra.addActionListener(this);
-		ultraPanel.add(clear);
-		clear.addActionListener(this);
-		ultraPanel.add(display);
-		ultraPanel.setPreferredSize(new Dimension(510, 255));
+		ultraPanel.add(clearUltra);
+		clearUltra.addActionListener(this);
+		ultraPanel.add(ultraScrollPane);
+		DefaultCaret caret1 = (DefaultCaret) ultraDisplay.getCaret();
+		caret1.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+		ultraPanel.setPreferredSize(new Dimension(510, 220));
 		addBorder(ultraPanel, "Ultrasonic Sensor");
-		add(ultraPanel);
+		mainPanel.add(ultraPanel);
+		
+		//ultraPanel.add(clear);
+		//clear.addActionListener(this);
+		
+		//Adds display to messagePanel to display what is being sent to the Raspberry Pi
+		messagePanel.add(clearMessage);
+		clearMessage.addActionListener(this);
+		messagePanel.add(messageScrollPane);
+		DefaultCaret caret2 = (DefaultCaret) messageDisplay.getCaret();
+		caret2.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+		messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
+		
+		// Sets up tabs for tabbedPane and adds to UI	
+		tabbedPane.addTab("Robot Controller", mainPanel);
+		tabbedPane.addTab("Sent Messages", messagePanel);
+		add(tabbedPane);
 		
 		
 	}
+
 	
 	//Handles button presses
 	public void actionPerformed(ActionEvent e){
 		//If ultra button is pressed, ultrasonic sensor value is retrieved from raspberry pi. 
 		if (e.getSource() == ultra){
 			Client.handleNetworkEvent("ultra");
-			display.append("Ultrasonic sensor value is " + Client.getValue() + "\n");
+			if (UltrasonicGetter.getUltra == false){
+				ultra.setText("Stop receiving ultrasonic sensor values");
+				UltrasonicGetter.getUltra = true;
+			}
+			else {
+				UltrasonicGetter.getUltra = false;
+				ultra.setText("Receive ultrasonic sensor values");
+			}
 		}
 		//If clear is pressed, textfield will be cleared
-		if (e.getSource() == clear)
-			display.setText("");
+		if (e.getSource() == clearUltra)
+			ultraDisplay.setText("");
+		if (e.getSource() == clearMessage)
+			messageDisplay.setText("");
 		//If stop is pressed the robot should stop.
 		if (e.getSource() == stop){
 			Client.handleNetworkEvent("stop");
-			display.append("stop\n");
 		}
 		//If follow line is pressed the robot should follow a line.
-		if (e.getSource() == followLine){
+		if (e.getSource() == followLine)
 			Client.handleNetworkEvent("followline");
-			display.append("followline\n");
-		}
 		/*If RaspberryPi-> Shutdown is chosen a dialogue box will appear asking user to confirm,
 		  if 'no' is chosen, nothing will happen. If 'yes' is chosen, the Raspberry Pi will shut
 		  down and this program will exit. */
@@ -121,31 +154,20 @@ public class RobotUser extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "The Raspberry Pi will shut down and this"
 						+ " program will now stop");
 				Client.handleNetworkEvent("shutdown");
-				display.append("shutdown");
 				System.exit(0);
 			}
 		// Buttons for controlling pan/tilt mount
 		}
-		if (e.getSource() == up){
+		if (e.getSource() == up)
 			Client.handleNetworkEvent("tiltup");
-			display.append("tiltup\n");
-		}
-		if (e.getSource() == left){
+		if (e.getSource() == left)
 			Client.handleNetworkEvent("panleft");
-			display.append("panleft\n");
-		}
-		if (e.getSource() == right){
+		if (e.getSource() == right)
 			Client.handleNetworkEvent("panright");
-			display.append("panright\n");
-		}
-		if (e.getSource() == down){
+		if (e.getSource() == down)
 			Client.handleNetworkEvent("tiltdown");
-			display.append("tiltdown\n");
-		}
-		if (e.getSource() == servoinit){
+		if (e.getSource() == servoInit)
 			Client.handleNetworkEvent("servoinit");
-			display.append("servoinit\n");
-		}
 		}
 	
 	//Method for adding a border with title to a JPanel
@@ -160,8 +182,10 @@ public class RobotUser extends JFrame implements ActionListener {
 	 to be sent to the raspberry pi to stop the python script and the java program then exits*/
 	public static void main(String[] args){
 		Client client = new Client("192.168.1.1", 10001);
+		new Thread(new UltrasonicGetter()).start();
+		RobotUser.ultraDisplay.insert("Ultrasonic sensor value is 32.4cm", 0); 
 		RobotUser window = new RobotUser();
-		window.setSize(540, 680);
+		window.setSize(540, 700);
 		window.setVisible(true);
 		window.addWindowListener(new WindowAdapter(){
 			public void windowClosing(WindowEvent e){

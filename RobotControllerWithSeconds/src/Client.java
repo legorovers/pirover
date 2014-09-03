@@ -17,6 +17,7 @@ public class Client extends ClientServer{
 		}
 	}
 	
+	//Closes the socket
 	public void closeSocket(){
 		try {
 			socket.close();
@@ -29,6 +30,7 @@ public class Client extends ClientServer{
 	public static void handleNetworkEvent(String message){
 		try {
 			writeToSocket(socket, message);
+			RobotUser.messageDisplay.insert(message + "\n", 0);
 		} catch (IOException e) {
 			System.out.print(e.getMessage());
 			e.printStackTrace();

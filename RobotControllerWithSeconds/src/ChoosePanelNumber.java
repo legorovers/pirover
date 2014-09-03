@@ -91,7 +91,7 @@ public class ChoosePanelNumber extends JPanel implements ActionListener{
 			
 			/* Sets size of commandPanels depending on number of instances of CommandPanel and
 			repaints the ChoosePanelNumber instance in RobotUser so the user can see it*/
-			commandPanels.setPreferredSize( new Dimension(510, (90 + 34*(panelArray.size()-1))));			
+			commandPanels.setPreferredSize( new Dimension(510, (90 + 34*(panelArray.size()-1))));
 			RobotUser.instructionPanel.repaint();
 			RobotUser.instructionPanel.revalidate();
 		}

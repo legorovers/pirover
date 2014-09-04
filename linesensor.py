@@ -33,8 +33,8 @@ def followLine() :
 				initio.stop()
 				break 
 
-# This part makes robot continue doing its last aciton for a second or so, to try and find the line again
-# if it has been lost. Optional.
+# This part makes robot continue doing its last action for a second or so, to 
+# try and find the line again if it has been lost. Optional.
 #			while initio.irLeftLine() == False and initio.irRightLine() == False : 	
 #				counter = counter + 1
 #				if counter > 6 :
@@ -71,8 +71,8 @@ def followLine() :
 				initio.stop()
 				break 	
 
-# This part makes robot continue doing its last aciton for a second or so, to try and find the line again
-# if it has been lost. Optional.
+# This part makes robot continue doing its last action for a second or so, to 
+# try and find the line again if it has been lost. Optional.
 #			while initio.irLeftLine() == True and initio.irRightLine() == True : 	
 #				counter = counter + 1
 #				if counter > 6 :

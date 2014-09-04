@@ -183,7 +183,6 @@ public class RobotUser extends JFrame implements ActionListener{
 	public static void main(String[] args){
 		Client client = new Client("192.168.1.1", 10001);
 		new Thread(new UltrasonicGetter()).start();
-		RobotUser.ultraDisplay.insert("Ultrasonic sensor value is 32.4cm", 0); 
 		RobotUser window = new RobotUser();
 		window.setSize(540, 700);
 		window.setVisible(true);

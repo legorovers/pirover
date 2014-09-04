@@ -66,9 +66,7 @@ def doCondition() :
 	shouldCheck = False
 	initio.stop()
 
-# Receives input from socket and either assigns condition values,
-# quits the program, sends a value from the ultrasonic sensor,
-# or if it receives a command it appends the command to a list to be executed later
+# Receives input from socket and does appropriate action
 def getMessage() :
 	while True :				
 		try:
@@ -77,6 +75,8 @@ def getMessage() :
 			print message
 		except socket.error:
 			continue
+# If condition box is ticked, variables are assigned so robot does an action
+# if it encounters an obstacle
 		if (message.find('y') == 0) :
 			global shouldCheck
 			shouldCheck = True
@@ -90,19 +90,25 @@ def getMessage() :
 			global conditionValue
 			conditionValue = message[-4:].lstrip("0")
 			print 'conditionValue = ' + str(float(conditionValue))
+# Condition box is not ticked, so obstacles are not checked for
 		elif (message.find('n') == 0) :
 			global shouldCheck
 			shouldCheck = False
 			print 'shouldCheck is ' + str(shouldCheck)
+# If Java program is closed, this program closes the socket and waits for
+# another connection
 		elif (message == 'quit') :
 			lock.acquire()
 			clisock.close()
 			print 'Closing socket and creating new one...'
 			createSocket()
 			lock.release()
+# Shuts down the raspberry pi
 		elif (message == 'shutdown') :
 			clisock.close()
 			shutdown()
+# Starts sending the ultrasonic sensor distance every 2 seconds. If the
+# distance is already being sent, it stops sending it
 		elif (message == 'ultra') :
 			if shouldUltra == True:
 				global shouldUltra
@@ -112,19 +118,21 @@ def getMessage() :
 				global shouldUltra
 				print 'changing shouldUltra to True'
 				shouldUltra = True 
+# Makes the robot follow a line
 		elif (message == 'followline') :
 			linesensor.followLine()
+# Stops the robot and clears commands from the queue
 		elif (message == 'stop') :
 			lock.acquire()
-			global shouldFollow
-			linesensor.shouldFollow = False
 			initio.stop()
 			commands[:] = ['none']
 			values [:] = ['none']
 			lock.release()
+# Sets the servo position back to the middle
 		elif (message == 'servoinit') :
 			servo.panInit()
 			servo.tiltInit()
+# Moves the servos
 		elif (message == 'panleft') :
 			servo.panLeft()
 		elif (message == 'panright') :
@@ -133,6 +141,8 @@ def getMessage() :
 			servo.tiltUp()
 		elif (message == 'tiltdown') :
 			servo.tiltDown()
+# If anything else is sent, it must be a command so it is appended to a list
+# to be executed
 		else :
 			lock.acquire()
 			commands.append(getCommand(message))
@@ -229,6 +239,7 @@ class obstacleThread(threading.Thread) :
 	def run(self) :
 		checkObstacle()
 
+# Creates thread to send ultrasonic sensor distance every 2 seconds
 class ultraThread(threading.Thread) :
 	def _init_(self) :
 		threading.Thread._init_(self)
@@ -247,7 +258,8 @@ values = []
 # Creates socket which waits for a connection
 createSocket()
 
-# Once connection received creates and starts both threads to listen for, store  and execute commands
+# Once connection received creates and starts all threads to listen for, 
+# store  and execute commands
 lock = threading.Lock()
 thread1 = inputThread()
 thread2 = actionThread()
